@@ -1,5 +1,7 @@
 package main.java.view;
 
+import main.java.controller.SimonController;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -29,10 +31,9 @@ public class CustomizeSettings extends JFrame{
         );
 
         DifficultySelector = new JComboBox(new String[]{"Facile", "Medio", "Difficile"});
-        instrumentSelector = new JComboBox(new String[]{"Piano", "Organ", "Drums", "Sax", "Harp", "Guitar"});
+        instrumentSelector = new JComboBox(new String[]{"Piano", "Organo", "Batteria", "Sassofono", "Arpa", "Chitarra"});
         noteSelector = new JComboBox(new String[]{"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"});
-        scaleSelector = new JComboBox(new String[]{"Chromatic scale", "Major scale", "Minor scale", "Major pentatonic scale", "Minor pentatonic scale"
-                ,"Harmonic minor scale", "Phrygian dominant scale"});
+        scaleSelector = new JComboBox(new String[]{"Cromatica", "Maggiore", "Minore", "Pentatonica Maggiore", "Pentatonica Minore"});
 
 
         add(Box.createRigidArea(new Dimension(5,150)));
@@ -46,7 +47,7 @@ public class CustomizeSettings extends JFrame{
         //Più difficile = Più Tasti
         JPanel difficultySelection = new JPanel();
         difficultySelection.setAlignmentX(Component.CENTER_ALIGNMENT);
-        difficultySelection.setBorder(BorderFactory.createMatteBorder(5, 5, 0, 5, Color.GRAY));
+        difficultySelection.setBorder(BorderFactory.createMatteBorder(7, 7, 0, 7, Color.GRAY));
         add(difficultySelection);
         difficultySelection.add(Box.createRigidArea(new Dimension(7,65)));
 
@@ -74,7 +75,7 @@ public class CustomizeSettings extends JFrame{
          */
         JPanel instrumentSelection = new JPanel();
         instrumentSelection.setLayout(new BoxLayout(instrumentSelection, BoxLayout.X_AXIS));
-        instrumentSelection.setBorder(BorderFactory.createMatteBorder(0, 5, 0, 5, Color.GRAY));
+        instrumentSelection.setBorder(BorderFactory.createMatteBorder(0, 7, 0, 7, Color.GRAY));
         add(instrumentSelection);
         instrumentSelection.add(Box.createRigidArea(new Dimension(7,65)));
 
@@ -99,7 +100,7 @@ public class CustomizeSettings extends JFrame{
          */
         JPanel noteSelection = new JPanel();
         noteSelection.setLayout(new BoxLayout(noteSelection, BoxLayout.X_AXIS));
-        noteSelection.setBorder(BorderFactory.createMatteBorder(0, 5, 0, 5, Color.GRAY));
+        noteSelection.setBorder(BorderFactory.createMatteBorder(0, 7, 0, 7, Color.GRAY));
         add(noteSelection);
         noteSelection.add(Box.createRigidArea(new Dimension(7,65)));
 
@@ -125,7 +126,7 @@ public class CustomizeSettings extends JFrame{
          */
         JPanel scaleSelection = new JPanel();
         scaleSelection.setLayout(new BoxLayout(scaleSelection, BoxLayout.X_AXIS));
-        scaleSelection.setBorder(BorderFactory.createMatteBorder(0, 5, 5, 5, Color.GRAY));
+        scaleSelection.setBorder(BorderFactory.createMatteBorder(0, 7, 7, 7, Color.GRAY));
         add(scaleSelection);
         scaleSelection.add(Box.createRigidArea(new Dimension(7,65)));
 
@@ -146,6 +147,9 @@ public class CustomizeSettings extends JFrame{
         add(Box.createRigidArea(new Dimension(5,30)));
 
 
+        /*
+            Button inizia, invia i dati al SimonController per iniziare la partita customizzata
+         */
         playButton = new JButton("Inizia");
         playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         playButton.setFont(new Font("SansSerif", Font.BOLD, 22));
@@ -153,9 +157,10 @@ public class CustomizeSettings extends JFrame{
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                //Esco dall'applicazione
-                System.exit(0);
-
+                setVisible(false);
+                dispose();
+                new SimonController(difficultyToKeys(DifficultySelector.getSelectedItem().toString()), noteSelector.getSelectedIndex()+36,
+                        scaleSelector.getSelectedIndex(), instrumentSelector.getSelectedIndex(), false);
             }
         });
 
@@ -177,6 +182,20 @@ public class CustomizeSettings extends JFrame{
         add(Box.createRigidArea(new Dimension(5,60)));
 
         this.setVisible(true);
+    }
+
+    private int difficultyToKeys(String diff){
+        System.out.println(diff);
+        switch(diff){
+            case("Facile"):
+                return 4;
+            case("Medio"):
+                return 6;
+            case("Difficile"):
+                return 8;
+        }
+
+        return 4;
     }
 
 }

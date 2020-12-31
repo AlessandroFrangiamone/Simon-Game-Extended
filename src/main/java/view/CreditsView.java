@@ -7,11 +7,12 @@ import java.awt.event.ActionListener;
 
 public class CreditsView extends JFrame{
 
-    private JButton backButton;
     private JLabel credits_text;
+    private JButton backButton;
 
     public CreditsView(){
         super("Simon Game Extended - Credits");
+        //Default Settings
         this.setSize(900, 900);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -21,9 +22,14 @@ public class CreditsView extends JFrame{
                 new BoxLayout(getContentPane(), BoxLayout.Y_AXIS)
         );
 
-
+        //spazio
         add(Box.createRigidArea(new Dimension(5,150)));
 
+
+
+        /*
+            Label contenente tutti i crediti, ho usato html per formattare dato che è comodo
+         */
         credits_text = new JLabel("", SwingConstants.CENTER);
         credits_text.setAlignmentX(Component.CENTER_ALIGNMENT);
         credits_text.setText("<html>Questo progetto è stato realizzato da <b>Alessandro Frangiamone</b> per il corso<br>" +
@@ -33,8 +39,14 @@ public class CreditsView extends JFrame{
         credits_text.setForeground(Color.white);
         add(credits_text);
 
+        //spazio
         add(Box.createRigidArea(new Dimension(5,50)));
 
+
+
+        /*
+            Pulsante Indietro, torna nel menù
+         */
         backButton = new JButton("Indietro");
         backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         backButton.setFont(new Font("SansSerif", Font.BOLD, 22));
