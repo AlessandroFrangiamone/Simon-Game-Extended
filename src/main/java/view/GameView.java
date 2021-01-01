@@ -1,11 +1,15 @@
 package main.java.view;
 
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import main.java.controller.SimonController;
 import main.java.model.CurrentData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 import static main.java.controller.SimonController.counting;
 
@@ -14,16 +18,26 @@ public class GameView extends JFrame implements AWTEventListener {
 
     private JButton playButton;
     private JButton exitButton;
+    private JButton repeatButton;
 
     private JLabel answerType;
     private JLabel score;
+    private JLabel highScore;
 
     private Board[] boards;
     private CurrentData data;
 
+
+    //Istanzio javafx per poi riprodurre l'audio del menù
+    final JFXPanel fxPanel = new JFXPanel();
+    final Media media = new Media(new File("src/main/resources/music/bad-beep-incorrect.mp3").toURI().toString());
+    final MediaPlayer mediaPlayer = new MediaPlayer(media);
+
     //variabile che determina quando è il turno dell'utente nel gioco
     private boolean playing = true;
-    private boolean start = false;
+
+    //indica se si è premuto il bottone "ripeti"
+    private boolean ripetuto = false;
 
 
     public GameView(CurrentData data){
@@ -49,7 +63,7 @@ public class GameView extends JFrame implements AWTEventListener {
 
 
 
-        add(Box.createRigidArea(new Dimension(5,300)));
+        add(Box.createRigidArea(new Dimension(5,265)));
 
 
         setLayout(
@@ -62,7 +76,7 @@ public class GameView extends JFrame implements AWTEventListener {
         g.setBorder(BorderFactory.createMatteBorder(7, 7, 7, 7, Color.GRAY));
         boards=new Board[data.getBoardsNumber()];
         for(int i=0;i<data.getBoardsNumber();i++){
-            boards[i] = new Board("src/main/resources/img/button_not_pressed.png", data);
+            boards[i] = new Board("src/main/resources/img/button_not_pressed"+i+".png", data);
             g.add(boards[i]);
         }
         add(g);
@@ -81,6 +95,14 @@ public class GameView extends JFrame implements AWTEventListener {
         score.setForeground(Color.WHITE);
         add(score);
 
+        add(Box.createRigidArea(new Dimension(5,10)));
+        highScore = new JLabel("-");
+        highScore.setAlignmentX(Component.CENTER_ALIGNMENT);
+        highScore.setFont(new Font("SansSerif", Font.BOLD, 22));
+        highScore.setText("Punteggio Migliore: "+0);
+        highScore.setForeground(Color.WHITE);
+        add(highScore);
+
         add(Box.createRigidArea(new Dimension(5,40)));
         answerType = new JLabel("-");
         answerType.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -88,7 +110,33 @@ public class GameView extends JFrame implements AWTEventListener {
         answerType.setText("Premi inizia (o invio) per giocare");
         answerType.setForeground(Color.ORANGE);
         add(answerType);
-        add(Box.createRigidArea(new Dimension(5,50)));
+        add(Box.createRigidArea(new Dimension(5,20)));
+
+
+
+
+
+        repeatButton = new JButton("Ripeti");
+        repeatButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        repeatButton.setFont(new Font("SansSerif", Font.BOLD, 22));
+        add(repeatButton);
+        repeatButton.setEnabled(false);
+        repeatButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SimonController.playPattern(data.getLevel());
+                repeatButton.setEnabled(false);
+                playing=false;
+                ripetuto=true;
+            }
+        });
+
+        add(Box.createRigidArea(new Dimension(5,20)));
+
+
+
+
+
 
         playButton = new JButton("Inizia");
         playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -99,12 +147,13 @@ public class GameView extends JFrame implements AWTEventListener {
             public void actionPerformed(ActionEvent actionEvent) {
                 SimonController.playPattern(data.getLevel());
                 playButton.setEnabled(false);
+                repeatButton.setEnabled(true);
                 answerType.setText("   ");
                 playing=false;
             }
         });
 
-        add(Box.createRigidArea(new Dimension(5,30)));
+        add(Box.createRigidArea(new Dimension(5,50)));
 
         exitButton = new JButton("Indietro");
         exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -138,11 +187,14 @@ public class GameView extends JFrame implements AWTEventListener {
 
             KeyEvent key = (KeyEvent)event;
             if(key.getID()==KeyEvent.KEY_PRESSED){ //Handle key presses
+
+                //Premuto Invio
                 if(key.getKeyCode() == KeyEvent.VK_ENTER){
                     if(playButton.isEnabled()) {
                         SimonController.playPattern(data.getLevel());
                         playButton.setEnabled(false);
                         answerType.setText("   ");
+                        repeatButton.setEnabled(true);
                         playing = false;
                     }
                 }else {
@@ -154,7 +206,7 @@ public class GameView extends JFrame implements AWTEventListener {
             }
 
             if(key.getID()==KeyEvent.KEY_RELEASED){ //Handle key presses
-                boards[keyToIndex(key.getKeyChar())].setImage("src/main/resources/img/button_not_pressed.png");
+                boards[keyToIndex(key.getKeyChar())].setImage("src/main/resources/img/button_not_pressed"+keyToIndex(key.getKeyChar())+".png");
                 if(data.getLevel() > 0 && !data.isPlaying() && counting)
                     SimonController.checkNote(keyToIndex(key.getKeyChar()));
             }
@@ -182,30 +234,48 @@ public class GameView extends JFrame implements AWTEventListener {
             }
         });
         thread.start();
+        //punteggio scalato in base alla difficoltà, al progresso dei livelli e se l'utente ha premuto a meno ripeti
+        if(!ripetuto) {
+            data.setCurrentScorePoint((data.getBoardsNumber() * data.getCurrentScore()) / 2);
+            score.setText("Punteggio: " + data.getCurrentScorePoint());
+        }else {
+            data.setCurrentScorePoint(((data.getBoardsNumber() * data.getCurrentScore()) / 2)/2);
+            score.setText("Punteggio: " + data.getCurrentScorePoint());
+        }
+        ripetuto=false;
 
-        score.setText("Punteggio: "+data.getCurrentScore());
         if(data.getCurrentScore() >= data.getHighScore()) {
             //highScore.setText("High score :" + data.getCurrentScore());
             //updateScore();
         }
         //currentScore.setText("Current score: " + data.getCurrentScore());
         counting = false;
+        //abilito il pulsante continua alla risposta corretta
         playButton.setEnabled(true);
+        //Disabilito il bottone ripeti alla risposta corretta
+        repeatButton.setEnabled(false);
     }
 
 
     public void wrongAnswer(){
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    mediaPlayer.setVolume(0.7);
+                    mediaPlayer.play();
+
                     counting = false;
                     score.setText("Punteggio: "+0);
                     answerType.setText("Sbagliato");
                     answerType.setForeground(Color.RED);
                     playButton.setText("Riprova");
                     playButton.setEnabled(true);
+
                     Thread.sleep(1000);
+                    mediaPlayer.stop();
+
                     answerType.setText("Premi riprova (o invio) per rincominciare");
                     answerType.setForeground(Color.ORANGE);
                 } catch (InterruptedException e) {
@@ -215,6 +285,16 @@ public class GameView extends JFrame implements AWTEventListener {
             }
         });
         thread.start();
+        //Disabilito il bottone ripeti alla risposta errata
+        repeatButton.setEnabled(false);
+
+        if(data.getCurrentScorePoint()>data.getHighScore()){
+            data.setHighScore(data.getCurrentScorePoint());
+            highScore.setText("Punteggio Migliore: "+data.getHighScore());
+        }
+        System.out.println(data.getHighScore());
+        //azzero il punteggio
+        data.setCurrentScorePoint(-data.getCurrentScorePoint());
     }
 
 
@@ -229,12 +309,23 @@ public class GameView extends JFrame implements AWTEventListener {
                 for(int i = 0; i < data.getLevel(); i++){
                     try {
                         boards[data.getPattern()[i]].setPlaying(true);
-                        boards[data.getPattern()[i]].setImage("src/main/resources/img/button_pressed.png");
+                        if(data.isLight()) {
+                            boards[data.getPattern()[i]].setImage("src/main/resources/img/button_pressed.png");
+                        }
                         if(i==data.getLevel())
                             playing=true;
-                        Thread.sleep(1000);
+
+                        if(data.getVelocità()==0) {
+                            Thread.sleep(1000);
+                        }else{
+                            if(data.getVelocità()==1)
+                                Thread.sleep(750);
+                            else
+                                Thread.sleep(500);
+                        }
+
                         boards[data.getPattern()[i]].setPlaying(false);
-                        boards[data.getPattern()[i]].setImage("src/main/resources/img/button_not_pressed.png");
+                        boards[data.getPattern()[i]].setImage("src/main/resources/img/button_not_pressed"+data.getPattern()[i]+".png");
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -266,6 +357,23 @@ public class GameView extends JFrame implements AWTEventListener {
             case('j'):
                 return 6;
             case('k'):
+                return 7;
+
+            case('A'):
+                return 0;
+            case('S'):
+                return 1;
+            case('D'):
+                return 2;
+            case('F'):
+                return 3;
+            case('G'):
+                return 4;
+            case('H'):
+                return 5;
+            case('J'):
+                return 6;
+            case('K'):
                 return 7;
         }
         return -1;

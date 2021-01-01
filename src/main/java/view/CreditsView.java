@@ -18,6 +18,15 @@ public class CreditsView extends JFrame{
         setResizable(false);
         getContentPane().setBackground(Color.BLACK);
 
+
+
+        setLayout(
+                new BorderLayout()
+        );
+
+        //Setto il background del Menù
+        setContentPane(new JLabel(new ImageIcon("src/main/resources/img/background_credits.jpg")));
+
         setLayout(
                 new BoxLayout(getContentPane(), BoxLayout.Y_AXIS)
         );
@@ -35,8 +44,8 @@ public class CreditsView extends JFrame{
         credits_text.setText("<html>Questo progetto è stato realizzato da <b>Alessandro Frangiamone</b> per il corso<br>" +
                 "Programmazione per la Musica svolto dal professor Adriano Baratè presso <br>" +
                 "l'Università degli Studi di Milano nell'anno accademico 2020/2021.</html>");
-        credits_text.setFont(new Font("SansSerif", Font.PLAIN, 18));
-        credits_text.setForeground(Color.white);
+        credits_text.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        credits_text.setForeground(Color.WHITE);
         add(credits_text);
 
         //spazio

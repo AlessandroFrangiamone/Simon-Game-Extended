@@ -22,12 +22,12 @@ public class SimonController {
     public static Part temp;                     //played by the user
     public static GameView gameView;
 
-    public SimonController(int keysNumber, int key, int scale, int instrument, boolean customPattern){
-        setCurrentData(keysNumber, key, scale, instrument, customPattern, 0);
+    public SimonController(int keysNumber, int key, int scale, int instrument, boolean customPattern, int velocità, boolean light){
+        setCurrentData(keysNumber, key, scale, instrument, customPattern, 0, velocità, light);
     }
 
-    private void setCurrentData(int keysNumber, int key, int scale, int instrument, boolean customPattern, int pattern){
-        data = new CurrentData(keysNumber, key, scale, instrument, customPattern);
+    private void setCurrentData(int keysNumber, int key, int scale, int instrument, boolean customPattern, int pattern, int velocità, boolean light){
+        data = new CurrentData(keysNumber, key, scale, instrument, customPattern, velocità, light);
         data.resetScore();
         //initializeScore();
         data.setInstrument(instrument);
@@ -99,7 +99,15 @@ public class SimonController {
     public static void playPattern(int n){
         Phrase phrase = new Phrase();
         //imposta i bpm
-        part.setTempo(55);
+        if(data.getVelocità()==0) {
+            part.setTempo(60);
+        }else{
+            if(data.getVelocità()==1)
+                part.setTempo(90);
+            else
+                part.setTempo(120);
+        }
+
         if(part.length() != 0)
             part.removeAllPhrases();
         for(int i = 0; i < n; i++){

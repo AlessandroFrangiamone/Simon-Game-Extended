@@ -85,7 +85,7 @@ public class MenuView extends JFrame {
                 setVisible(false);
                 dispose();
                 new SimonController(4, 0+36,
-                        0, 0, false);
+                        0, 0, false, 0, true);
             }
         });
 
