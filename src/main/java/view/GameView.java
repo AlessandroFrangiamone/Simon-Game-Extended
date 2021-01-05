@@ -10,6 +10,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import static main.java.controller.SimonController.counting;
 
@@ -28,7 +30,7 @@ public class GameView extends JFrame implements AWTEventListener {
     private CurrentData data;
 
 
-    //Istanzio javafx per poi riprodurre l'audio del menù
+    //Istanzio javafx per riprodurre i sound effects (per ora è presente solo risposta sbagliata)
     final JFXPanel fxPanel = new JFXPanel();
     final Media media = new Media(new File("src/main/resources/music/bad-beep-incorrect.mp3").toURI().toString());
     final MediaPlayer mediaPlayer = new MediaPlayer(media);
@@ -61,10 +63,7 @@ public class GameView extends JFrame implements AWTEventListener {
                 new BoxLayout(getContentPane(), BoxLayout.Y_AXIS)
         );
 
-
-
         add(Box.createRigidArea(new Dimension(5,265)));
-
 
         setLayout(
                 new FlowLayout()
@@ -99,7 +98,7 @@ public class GameView extends JFrame implements AWTEventListener {
         highScore = new JLabel("-");
         highScore.setAlignmentX(Component.CENTER_ALIGNMENT);
         highScore.setFont(new Font("SansSerif", Font.BOLD, 22));
-        highScore.setText("Punteggio Migliore: "+0);
+        highScore.setText("Punteggio Migliore: "+data.getHighScore());
         highScore.setForeground(Color.WHITE);
         add(highScore);
 
@@ -174,7 +173,6 @@ public class GameView extends JFrame implements AWTEventListener {
         add(Box.createRigidArea(new Dimension(5,60)));
 
         //KeyListener
-        //getRootPane().setDefaultButton(playButton);
         this.getToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
 
 
@@ -186,7 +184,7 @@ public class GameView extends JFrame implements AWTEventListener {
         if(event instanceof KeyEvent && playing){
 
             KeyEvent key = (KeyEvent)event;
-            if(key.getID()==KeyEvent.KEY_PRESSED){ //Handle key presses
+            if(key.getID()==KeyEvent.KEY_PRESSED){ //Gestisce la pressione del tasto
 
                 //Premuto Invio
                 if(key.getKeyCode() == KeyEvent.VK_ENTER){
@@ -205,7 +203,7 @@ public class GameView extends JFrame implements AWTEventListener {
 
             }
 
-            if(key.getID()==KeyEvent.KEY_RELEASED){ //Handle key presses
+            if(key.getID()==KeyEvent.KEY_RELEASED){ //Gestisce il rilascio del tasto
                 boards[keyToIndex(key.getKeyChar())].setImage("src/main/resources/img/button_not_pressed"+keyToIndex(key.getKeyChar())+".png");
                 if(data.getLevel() > 0 && !data.isPlaying() && counting)
                     SimonController.checkNote(keyToIndex(key.getKeyChar()));
@@ -234,6 +232,7 @@ public class GameView extends JFrame implements AWTEventListener {
             }
         });
         thread.start();
+
         //punteggio scalato in base alla difficoltà, al progresso dei livelli e se l'utente ha premuto a meno ripeti
         if(!ripetuto) {
             data.setCurrentScorePoint((data.getBoardsNumber() * data.getCurrentScore()) / 2);
@@ -244,11 +243,15 @@ public class GameView extends JFrame implements AWTEventListener {
         }
         ripetuto=false;
 
-        if(data.getCurrentScore() >= data.getHighScore()) {
-            //highScore.setText("High score :" + data.getCurrentScore());
-            //updateScore();
+        System.out.println(data.getCurrentScore()+"   -   "+data.getHighScore());
+
+        if(data.getCurrentScorePoint() >= data.getHighScore()) {
+            //Aggiorno il file di testo high_score.txt
+            updateScore();
+
+            data.setHighScore(data.getCurrentScorePoint());
+            highScore.setText("Punteggio Migliore: "+data.getHighScore());
         }
-        //currentScore.setText("Current score: " + data.getCurrentScore());
         counting = false;
         //abilito il pulsante continua alla risposta corretta
         playButton.setEnabled(true);
@@ -258,7 +261,6 @@ public class GameView extends JFrame implements AWTEventListener {
 
 
     public void wrongAnswer(){
-
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -285,18 +287,26 @@ public class GameView extends JFrame implements AWTEventListener {
             }
         });
         thread.start();
+
         //Disabilito il bottone ripeti alla risposta errata
         repeatButton.setEnabled(false);
 
-        if(data.getCurrentScorePoint()>data.getHighScore()){
-            data.setHighScore(data.getCurrentScorePoint());
-            highScore.setText("Punteggio Migliore: "+data.getHighScore());
-        }
-        System.out.println(data.getHighScore());
         //azzero il punteggio
         data.setCurrentScorePoint(-data.getCurrentScorePoint());
     }
 
+    //Aggiorna lo score migliore nel file di tasto high_score.txt
+    private void updateScore() {
+        try {
+            File file = new File("src/main/resources/other/high_score.txt");
+            PrintWriter printWriter = new PrintWriter(file);
+            printWriter.print(data.getCurrentScorePoint());
+            printWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     public void playPattern(){
@@ -339,7 +349,7 @@ public class GameView extends JFrame implements AWTEventListener {
     }
 
 
-
+    //Si occupa di convertire in indice il char del tasto premuto sulla tastiera
     private int keyToIndex(char key){
         switch(key){
             case('a'):
@@ -378,12 +388,4 @@ public class GameView extends JFrame implements AWTEventListener {
         }
         return -1;
     }
-
-    /*public void initialiseBoards(){
-        boards=new Board[data.getBoardsNumber()];
-        for(int i=0;i<data.getBoardsNumber();i++){
-            boards[i] = new Board("src/main/resources/img/button_not_pressed.png");
-            add(boards[i]);
-        }
-    }*/
 }

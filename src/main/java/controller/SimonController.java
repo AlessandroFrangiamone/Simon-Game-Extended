@@ -4,13 +4,12 @@ import jm.constants.ProgramChanges;
 import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
-import jm.music.data.Score;
 import jm.util.Play;
-import jm.util.Read;
 import main.java.model.CurrentData;
 import main.java.view.GameView;
-
+import java.io.File;
 import java.util.Random;
+import java.util.Scanner;
 
 public class SimonController {
 
@@ -19,17 +18,17 @@ public class SimonController {
     public static boolean counting = false;
     public static CurrentData data;
     public static Part part;                     //random part
-    public static Part temp;                     //played by the user
+    public static Part temp;                     //Suonata dall'utente
     public static GameView gameView;
 
-    public SimonController(int keysNumber, int key, int scale, int instrument, boolean customPattern, int velocità, boolean light){
-        setCurrentData(keysNumber, key, scale, instrument, customPattern, 0, velocità, light);
+    public SimonController(int keysNumber, int key, int scale, int instrument, int velocità, boolean light){
+        setCurrentData(keysNumber, key, scale, instrument, velocità, light);
     }
 
-    private void setCurrentData(int keysNumber, int key, int scale, int instrument, boolean customPattern, int pattern, int velocità, boolean light){
-        data = new CurrentData(keysNumber, key, scale, instrument, customPattern, velocità, light);
+    private void setCurrentData(int keysNumber, int key, int scale, int instrument, int velocità, boolean light){
+        data = new CurrentData(keysNumber, key, scale, instrument, velocità, light);
         data.resetScore();
-        //initializeScore();
+        initializeScore();
         data.setInstrument(instrument);
         loadNotes();
         setInstrument();
@@ -92,6 +91,18 @@ public class SimonController {
                 temp = new Part("Nylon guitar", ProgramChanges.NYLON_GUITAR);
                 break;
         }
+    }
+
+    //Inizializza l'highscore
+    public void initializeScore(){
+        try{
+            File file = new File("src/main/resources/other/high_score.txt");
+            Scanner scanner = new Scanner(file);
+            data.setHighScore(Integer.valueOf(scanner.nextLine()));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
 

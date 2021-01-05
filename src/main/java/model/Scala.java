@@ -51,24 +51,4 @@ public class Scala {
         }
         return offset;
     }
-
-    public String noteToString(int note, CurrentData data) {
-        int octave = data.getKey()/12;
-        if(!data.isCustomPattern())
-            note += data.getKey() - 36;
-        int tempNote = note;
-        while (tempNote >= 12) {
-            tempNote -= 12;
-        }
-        if(note >= 8) {
-            octave++;
-            note -= 8;
-        }
-        while(note >= 12){
-            octave++;
-            note -= 12;
-        }
-        return (notes[tempNote] + String.valueOf(octave));
-    }
-
 }

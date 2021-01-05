@@ -218,7 +218,7 @@ public class CustomizeSettings extends JFrame{
                 setVisible(false);
                 dispose();
                 new SimonController(difficultyToKeys(DifficultySelector.getSelectedItem().toString()), noteSelector.getSelectedIndex()+36,
-                        scaleSelector.getSelectedIndex(), instrumentSelector.getSelectedIndex(), false, speedSelector.getSelectedIndex(), (lightSelector.getSelectedItem()=="Si")?true:false);
+                        scaleSelector.getSelectedIndex(), instrumentSelector.getSelectedIndex(), speedSelector.getSelectedIndex(), (lightSelector.getSelectedItem()=="Si")?true:false);
             }
         });
 

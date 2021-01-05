@@ -42,7 +42,6 @@ public class Board extends JLabel {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //System.out.println(data.getBoardsNumber());
         g.drawImage(img, 6, 6, 90, 90, null);
     }
 

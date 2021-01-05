@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Random;
 
 import javafx.embed.swing.JFXPanel;
 import main.java.controller.SimonController;
@@ -85,7 +86,7 @@ public class MenuView extends JFrame {
                 setVisible(false);
                 dispose();
                 new SimonController(4, 0+36,
-                        0, 0, false, 0, true);
+                        new Random().nextInt(4), new Random().nextInt(5), 0, true);
             }
         });
 
